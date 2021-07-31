@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <title>JairusCoin Wallet</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">JairusCoin Wallet</a>
+        <div class="float-right" id="navbarSupportedContent">
+          <div class="d-flex">
+            <input id="balanceInput" class="form-control me-2" type="search" placeholder="Address" aria-label="Search">
+            <button id="balanceButton" class="btn btn-info">Show Balance</button>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <div class="container m-3">
+      <h3>
+        Balance:
+        <small id="balanceOutput" class="text-muted">N/A</small>
+      </h3>
+      <div>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Username</label>
+          <input type="text" class="form-control" id="username" aria-describedby="emailHelp">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputPassword1" class="form-label">Password</label>
+          <input type="password" class="form-control" id="password">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Receiver</label>
+          <input type="text" class="form-control" id="receiver">
+        </div>
+        <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Amount</label>
+          <input type="number" class="form-control" id="amount">
+        </div>
+        <button class="btn btn-primary" id="transferButton">Transfer</button>
+        <button class="btn btn-light" id="mintButton">Mint</button>
+      </div>
+    </div>
+    <script text="javascript">
+      window.onload = () => {
+        const balanceInput = document.querySelector('#balanceInput');
+        const balanceButton = document.querySelector('#balanceButton');
+        const balanceOutput = document.querySelector('#balanceOutput');
+
+        const username = document.querySelector('#username');
+        const password = document.querySelector('#password');
+        const receiver = document.querySelector('#receiver');
+        const amount = document.querySelector('#amount');
+        const transferButton = document.querySelector('#transferButton');
+        const mintButton = document.querySelector('#mintButton');
+
+        balanceButton.addEventListener('click', getBalance);
+        transferButton.addEventListener('click', transfer);
+        mintButton.addEventListener('click', mint);
+
+        async function getBalance() {
+          const response = await fetch(`http://localhost:3000/coins/${balanceInput.value}`, {
+              method: 'GET',
+          });
+          const json = await response.json();
+
+          balanceOutput.innerHTML = `${json.balance} (${balanceInput.value})`
+
+          console.log(json);
+        }
+
+        async function transfer() {
+          const response = await fetch('http://localhost:3000/coins/transfer', {
+            method: 'POST',
+            body: JSON.stringify({
+              username: username.value,
+              password: password.value,
+              receiver: receiver.value,
+              amount: amount.value,
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          const json = await response.json();
+
+          console.log(json);
+        }
+
+        async function mint() {
+          const response = await fetch('http://localhost:3000/coins/mint', {
+            method: 'POST',
+            body: JSON.stringify({
+              username: username.value,
+              password: password.value,
+              receiver: receiver.value,
+              amount: amount.value,
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          const json = await response.json();
+
+          console.log(json);
+        }
+      }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+  </body>
+</html>

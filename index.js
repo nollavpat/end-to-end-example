@@ -1,5 +1,8 @@
+require('dotenv').config()
+
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const Web3 = require('web3');
 
 // express stuff
@@ -7,17 +10,20 @@ const app = express();
 const port = 3000;
 
 // web3 stuff
-const chainUrl = 'ws://localhost:8545'; // change to your own chain url
+// const chainUrl = 'ws://localhost:8545'; // change to your own chain url
+const chainUrl = process.env.CHAIN_URL; // change to your own chain url
 const web3 = new Web3(chainUrl);
 const coinsABI = require('./contracts/JairusCoin.json');
-const contractAddress = '0xBb298610f56Ed44Be7D7419D729dd5ddF6a4C03F'; // add contract address
+// const contractAddress = '0xBb298610f56Ed44Be7D7419D729dd5ddF6a4C03F'; // add contract address
+const contractAddress = process.env.CONTRACT_ADDRESS; // add contract address
 const coinsContract = new web3.eth.Contract(
     coinsABI,
     contractAddress,
 );
 
 // db stuff
-const minterAddress = '0x9a7b81395c69aBb692614089c5671A2EEcdfE079';
+// const minterAddress = '0x9a7b81395c69aBb692614089c5671A2EEcdfE079';
+const minterAddress = process.env.MINTER_ADDRESS;
 const db = {
   users: [
     {
@@ -43,6 +49,8 @@ const db = {
 
 
 app.use(bodyParser.json()); // middleware
+app.use(cors()); // default allow all
+app.use(express.static('public'));
 
 app.get('/example', async (req, res) => {
   const accounts = await web3.eth.getAccounts();
@@ -65,6 +73,7 @@ app.get('/coins/:address', async (req, res) => {
 
 // transfer coins
 app.post('/coins/transfer', async (req, res) => {
+  // send otp
   const user = db.users.find((user) => {
     return user.username === req.body.username && user.password === req.body.password;
   });
@@ -77,6 +86,8 @@ app.post('/coins/transfer', async (req, res) => {
   }
 
   await coinsContract.methods.send(req.body.receiver, req.body.amount).send({from: user.address});
+
+  // send sms, email
 
   res.status(200).json({
     message: 'Successfully transferred amount!',
@@ -184,3 +195,14 @@ app.post('/logout', () => {
 app.listen(port, () => { // serve
   console.log(`Example app listening at http://localhost:${port}`);
 });
+
+
+/**
+ * blockchain
+ * balances = {address: amount}
+ *
+ * database
+ * users
+ *  id        name     age
+ *  address   jairus    xx
+ */
